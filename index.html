@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>LumaRoom — видеозвонок с другом</title>
+    <title>LumaRoom — голосовой звонок</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -16,7 +16,7 @@
             padding: 20px;
         }
         .container {
-            max-width: 1000px;
+            max-width: 800px;
             width: 100%;
             background: rgba(255,255,255,0.95);
             border-radius: 20px;
@@ -89,19 +89,6 @@
             border: 2px dashed #667eea;
             word-break: break-all;
         }
-        .videos {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-top: 20px;
-        }
-        video {
-            width: 100%;
-            background: #1a1a1a;
-            border-radius: 12px;
-            aspect-ratio: 16/9;
-            object-fit: cover;
-        }
         .status {
             margin-top: 15px;
             padding: 10px;
@@ -111,22 +98,42 @@
         .status.success { background: #d4edda; color: #155724; }
         .status.info { background: #d1ecf1; color: #0c5460; }
         .status.waiting { background: #fff3cd; color: #856404; }
-        .local-label, .remote-label {
-            text-align: center;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #555;
+        .mic-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .mic-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #28a745;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
         }
         @media (max-width: 768px) {
             .grid { grid-template-columns: 1fr; }
-            .videos { grid-template-columns: 1fr; }
             h1 { font-size: 2em; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎥 LumaRoom</h1>
+        <h1>🎙️ LumaRoom — голосовой звонок</h1>
+        
+        <div class="mic-status" id="micStatus">
+            <span class="mic-dot"></span>
+            <span>Проверка микрофона...</span>
+        </div>
         
         <div class="grid">
             <!-- Создание комнаты -->
@@ -150,16 +157,9 @@
             </div>
         </div>
         
-        <!-- Видео -->
-        <div class="videos">
-            <div>
-                <div class="local-label">📹 Вы</div>
-                <video id="localVideo" autoplay muted playsinline></video>
-            </div>
-            <div>
-                <div class="remote-label">👤 Друг</div>
-                <video id="remoteVideo" autoplay playsinline></video>
-            </div>
+        <!-- Индикатор разговора -->
+        <div style="text-align: center; margin-top: 20px; padding: 15px; background: #f0f2f5; border-radius: 10px;" id="callStatus">
+            💬 Ожидание звонка...
         </div>
     </div>
 
@@ -174,10 +174,10 @@
         const roomInfo = document.getElementById('roomInfo');
         const roomCode = document.getElementById('roomCode');
         const copyBtn = document.getElementById('copyBtn');
-        const localVideo = document.getElementById('localVideo');
-        const remoteVideo = document.getElementById('remoteVideo');
         const hostStatus = document.getElementById('hostStatus');
         const joinStatus = document.getElementById('joinStatus');
+        const micStatus = document.getElementById('micStatus');
+        const callStatus = document.getElementById('callStatus');
 
         // Переменные
         let localStream = null;
@@ -197,17 +197,25 @@
             return result;
         }
 
-        // Получение доступа к камере
-        async function getLocalMedia() {
+        // Получение доступа только к микрофону
+        async function getLocalAudio() {
             try {
+                micStatus.innerHTML = '<span class="mic-dot"></span><span>🔄 Запрашиваем доступ к микрофону...</span>';
+                
                 localStream = await navigator.mediaDevices.getUserMedia({ 
-                    video: true, 
-                    audio: true 
+                    video: false, 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                    }
                 });
-                localVideo.srcObject = localStream;
+                
+                micStatus.innerHTML = '<span class="mic-dot" style="background: #28a745;"></span><span>✅ Микрофон готов</span>';
                 return true;
             } catch (err) {
-                alert('Нужен доступ к камере и микрофону: ' + err.message);
+                micStatus.innerHTML = '<span class="mic-dot" style="background: #dc3545;"></span><span>❌ Нет доступа к микрофону</span>';
+                alert('Пожалуйста, разрешите доступ к микрофону: ' + err.message);
                 return false;
             }
         }
@@ -233,15 +241,20 @@
                 if (peerId) {
                     roomCode.textContent = id;
                     roomInfo.style.display = 'block';
+                    callStatus.textContent = '🎯 Комната создана. Ждём друга...';
                 }
             });
 
             peer.on('call', (call) => {
                 if (!localStream) return;
+                
+                callStatus.textContent = '📞 Входящий звонок! Соединяем...';
                 call.answer(localStream);
                 setupCallEvents(call);
+                
                 hostStatus.textContent = '🟢 Друг подключился!';
                 hostStatus.className = 'status success';
+                callStatus.textContent = '🎙️ Разговор начался! Говорите.';
             });
 
             peer.on('error', (err) => {
@@ -249,6 +262,9 @@
                 if (err.type === 'unavailable-id') {
                     alert('Этот код уже используется. Попробуйте другой.');
                 }
+                createBtn.disabled = false;
+                joinBtn.disabled = false;
+                callStatus.textContent = '❌ Ошибка соединения';
             });
 
             return peer;
@@ -258,26 +274,46 @@
         function setupCallEvents(call) {
             currentCall = call;
             
+            // Создаем аудио элемент для воспроизведения голоса друга
+            const audio = document.createElement('audio');
+            audio.autoplay = true;
+            
             call.on('stream', (remoteStream) => {
-                remoteVideo.srcObject = remoteStream;
+                audio.srcObject = remoteStream;
+                
+                // Пытаемся воспроизвести (нужно взаимодействие с пользователем)
+                audio.play().catch(e => {
+                    console.log('Автовоспроизведение заблокировано:', e);
+                    callStatus.innerHTML = '🔇 Нажмите в любом месте, чтобы услышать друга';
+                    
+                    // При клике включаем звук
+                    document.body.addEventListener('click', function playAudio() {
+                        audio.play();
+                        document.body.removeEventListener('click', playAudio);
+                        callStatus.textContent = '🎙️ Разговор начался! Говорите.';
+                    }, { once: true });
+                });
+                
                 joinStatus.textContent = '✅ Подключено!';
                 joinStatus.className = 'status success';
                 hostStatus.textContent = '✅ Друг подключился!';
                 hostStatus.className = 'status success';
+                callStatus.textContent = '🎙️ Разговор начался! Говорите.';
             });
 
             call.on('close', () => {
-                remoteVideo.srcObject = null;
+                audio.srcObject = null;
                 joinStatus.textContent = '❌ Соединение разорвано';
                 joinStatus.className = 'status waiting';
                 hostStatus.textContent = '❌ Друг отключился';
                 hostStatus.className = 'status waiting';
+                callStatus.textContent = '💬 Звонок завершён';
             });
         }
 
         // Создание комнаты
         createBtn.addEventListener('click', async () => {
-            const ok = await getLocalMedia();
+            const ok = await getLocalAudio();
             if (!ok) return;
             
             const roomId = generateRoomCode();
@@ -295,12 +331,13 @@
                 return;
             }
 
-            const ok = await getLocalMedia();
+            const ok = await getLocalAudio();
             if (!ok) return;
 
             initPeer();
             joinStatus.textContent = '⏳ Подключаемся...';
             joinStatus.className = 'status waiting';
+            callStatus.textContent = '📞 Звоним...';
 
             peer.on('open', () => {
                 const call = peer.call(roomId, localStream);
@@ -309,6 +346,9 @@
                 } else {
                     joinStatus.textContent = '❌ Комната не найдена';
                     joinStatus.className = 'status waiting';
+                    callStatus.textContent = '❌ Комната не найдена';
+                    createBtn.disabled = false;
+                    joinBtn.disabled = false;
                 }
             });
 
@@ -327,10 +367,14 @@
                 });
         });
 
-        // Разблокировка кнопок при ошибках
-        peer?.on('error', () => {
-            createBtn.disabled = false;
-            joinBtn.disabled = false;
+        // Сброс кнопок при ошибке
+        window.addEventListener('load', () => {
+            if (peer) {
+                peer.on('error', () => {
+                    createBtn.disabled = false;
+                    joinBtn.disabled = false;
+                });
+            }
         });
     </script>
 </body>
