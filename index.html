@@ -165,12 +165,12 @@
         
         <!-- Индикатор подключения к серверу -->
         <div style="text-align: center; margin-top: 10px; font-size: 14px; color: #666;" id="serverStatus">
-            🔄 Подключение к серверу...
+            🔄 Подключение к серверу SkyWay...
         </div>
     </div>
 
-    <!-- Библиотеки -->
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <!-- SkyWay (рабочая альтернатива PeerJS) -->
+    <script src="https://cdn.webrtc.ecl.ntt.com/skyway-4.4.1.js"></script>
     
     <script>
         // Элементы
@@ -191,7 +191,11 @@
         let peer = null;
         let currentCall = null;
 
-        // Генерация кода комнаты (только буквы и цифры, с дефисами внутри)
+        // Константы SkyWay (публичный ключ для тестов)
+        const SKYWAY_API_KEY = '568b5cb5-9edf-4ad1-ba46-e646ea7a9cf6';
+        const SKYWAY_DOMAIN = 'localhost';
+
+        // Генерация кода комнаты
         function generateRoomCode() {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let result = '';
@@ -201,13 +205,13 @@
                 }
                 if (i < 3) result += '-';
             }
-            return result; // Например: "ABCD-EFGH-IJKL"
+            return result;
         }
 
-        // Получение доступа только к микрофону
+        // Получение доступа к микрофону
         async function getLocalAudio() {
             try {
-                micStatus.innerHTML = '<span class="mic-dot"></span><span>🔄 Запрашиваем доступ к микрофону...</span>';
+                micStatus.innerHTML = '<span class="mic-dot"></span><span>🔄 Запрашиваем микрофон...</span>';
                 
                 localStream = await navigator.mediaDevices.getUserMedia({ 
                     video: false, 
@@ -227,43 +231,36 @@
             }
         }
 
-        // Настройка Peer с правильными параметрами
+        // Настройка SkyWay Peer
         function initPeer(peerId = null) {
             if (peer) {
                 peer.destroy();
                 peer = null;
             }
             
-            // Опции подключения согласно документации
+            serverStatus.textContent = '🔄 Подключение к SkyWay...';
+            
+            // Опции для SkyWay
             const options = {
-                host: '0.peerjs.com',  // Основной сервер
-                port: 443,              // HTTPS порт
-                path: '/',               // Корневой путь
-                secure: true,            // Используем HTTPS
-                debug: 3,                 // Максимальный уровень логов для отладки
-                config: {
-                    'iceServers': [
-                        { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:stun1.l.google.com:19302' },
-                        { urls: 'stun:stun2.l.google.com:19302' },
-                        { urls: 'stun:stun3.l.google.com:19302' },
-                        { urls: 'stun:stun4.l.google.com:19302' }
-                    ]
-                }
+                key: SKYWAY_API_KEY,
+                domain: SKYWAY_DOMAIN,
+                debug: 3 // Подробные логи
             };
             
-            serverStatus.textContent = `🔄 Подключение к ${options.host}:${options.port}...`;
+            if (peerId) {
+                options.id = peerId;
+            }
             
             try {
-                peer = new Peer(peerId, options);
+                peer = new Peer(options);
             } catch (err) {
-                serverStatus.textContent = `❌ Ошибка создания Peer: ${err.message}`;
+                serverStatus.textContent = `❌ Ошибка: ${err.message}`;
                 return null;
             }
 
             peer.on('open', (id) => {
-                console.log('✅ Peer открыт с ID:', id);
-                serverStatus.textContent = `✅ Подключено к ${peer.options.host} (ID: ${id})`;
+                console.log('✅ SkyWay подключен, ID:', id);
+                serverStatus.textContent = `✅ Подключено к SkyWay (ID: ${id})`;
                 serverStatus.style.color = '#28a745';
                 
                 if (peerId) {
@@ -275,7 +272,7 @@
             });
 
             peer.on('call', (call) => {
-                console.log('📞 Входящий звонок от', call.peer);
+                console.log('📞 Входящий звонок');
                 
                 if (!localStream) {
                     console.error('Нет локального потока');
@@ -284,7 +281,7 @@
                 
                 callStatus.textContent = '📞 Входящий звонок! Соединяем...';
                 
-                // Отвечаем на звонок с нашим аудиопотоком
+                // Отвечаем на звонок
                 call.answer(localStream);
                 
                 setupCallEvents(call);
@@ -295,32 +292,12 @@
             });
 
             peer.on('error', (err) => {
-                console.error('❌ Ошибка Peer:', err);
-                serverStatus.textContent = `❌ Ошибка: ${err.type} - ${err.message}`;
+                console.error('❌ Ошибка SkyWay:', err);
+                serverStatus.textContent = `❌ Ошибка: ${err.message}`;
                 serverStatus.style.color = '#dc3545';
-                
-                if (err.type === 'peer-unavailable') {
-                    joinStatus.textContent = '❌ Комната не найдена';
-                    joinStatus.className = 'status error';
-                } else if (err.type === 'network' || err.type === 'server-error') {
-                    callStatus.textContent = '❌ Проблема с соединением с сервером';
-                } else if (err.type === 'unavailable-id') {
-                    alert('Этот ID уже занят. Попробуйте создать комнату ещё раз.');
-                }
                 
                 createBtn.disabled = false;
                 joinBtn.disabled = false;
-            });
-
-            peer.on('disconnected', () => {
-                console.log('📴 Отключено от сервера');
-                serverStatus.textContent = '🔴 Отключено от сервера';
-                serverStatus.style.color = '#856404';
-            });
-
-            peer.on('close', () => {
-                console.log('🔚 Peer закрыт');
-                serverStatus.textContent = '⚫ Соединение закрыто';
             });
 
             return peer;
@@ -330,7 +307,6 @@
         function setupCallEvents(call) {
             currentCall = call;
             
-            // Создаем аудио элемент для воспроизведения голоса друга
             const audio = document.createElement('audio');
             audio.autoplay = true;
             
@@ -338,12 +314,10 @@
                 console.log('✅ Получен удаленный поток');
                 audio.srcObject = remoteStream;
                 
-                // Пытаемся воспроизвести (нужно взаимодействие с пользователем)
                 audio.play().catch(e => {
                     console.log('⚠️ Автовоспроизведение заблокировано:', e);
-                    callStatus.innerHTML = '🔇 Нажмите в любом месте, чтобы услышать друга';
+                    callStatus.innerHTML = '🔇 Нажмите, чтобы услышать друга';
                     
-                    // При клике включаем звук
                     const playHandler = () => {
                         audio.play();
                         document.body.removeEventListener('click', playHandler);
@@ -368,11 +342,6 @@
                 hostStatus.className = 'status error';
                 callStatus.textContent = '💬 Звонок завершён';
             });
-
-            call.on('error', (err) => {
-                console.error('❌ Ошибка звонка:', err);
-                callStatus.textContent = '❌ Ошибка звонка';
-            });
         }
 
         // Создание комнаты
@@ -381,7 +350,7 @@
             if (!ok) return;
             
             const roomId = generateRoomCode();
-            console.log('Создаём комнату с ID:', roomId);
+            console.log('Создаём комнату:', roomId);
             
             initPeer(roomId);
             
@@ -402,13 +371,12 @@
 
             console.log('Подключаемся к комнате:', roomId);
             
-            initPeer(); // Создаём peer без ID (сервер сгенерирует сам)
+            initPeer(); // Случайный ID
             
             joinStatus.textContent = '⏳ Подключаемся...';
             joinStatus.className = 'status waiting';
             callStatus.textContent = '📞 Звоним...';
 
-            // Ждём открытия peer и звоним
             peer.on('open', () => {
                 console.log('Peer открыт, звоним на', roomId);
                 
