@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>LumaRoom — видеозвонок с другом</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 { 
+            text-align: center; 
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border: 1px solid #e0e0e0;
+        }
+        h2 {
+            color: #444;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s;
+            width: 100%;
+            margin: 10px 0;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            text-transform: uppercase;
+        }
+        .code-block {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 18px;
+            text-align: center;
+            margin: 15px 0;
+            border: 2px dashed #667eea;
+            word-break: break-all;
+        }
+        .videos {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        video {
+            width: 100%;
+            background: #1a1a1a;
+            border-radius: 12px;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+        }
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        .status.success { background: #d4edda; color: #155724; }
+        .status.info { background: #d1ecf1; color: #0c5460; }
+        .status.waiting { background: #fff3cd; color: #856404; }
+        .local-label, .remote-label {
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+        }
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: 1fr; }
+            .videos { grid-template-columns: 1fr; }
+            h1 { font-size: 2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎥 LumaRoom</h1>
+        
+        <div class="grid">
+            <!-- Создание комнаты -->
+            <div class="section">
+                <h2>🎯 Создать комнату</h2>
+                <button id="createBtn">✨ Создать новую комнату</button>
+                <div id="roomInfo" style="display: none;">
+                    <p>👉 Отправьте этот код другу:</p>
+                    <div class="code-block" id="roomCode"></div>
+                    <button id="copyBtn">📋 Копировать код</button>
+                    <div class="status waiting" id="hostStatus">⏳ Ожидаем подключения друга...</div>
+                </div>
+            </div>
+            
+            <!-- Подключение к комнате -->
+            <div class="section">
+                <h2>🔑 Присоединиться</h2>
+                <input type="text" id="roomInput" placeholder="Введите код комнаты" maxlength="30">
+                <button id="joinBtn">🚪 Войти в комнату</button>
+                <div class="status" id="joinStatus"></div>
+            </div>
+        </div>
+        
+        <!-- Видео -->
+        <div class="videos">
+            <div>
+                <div class="local-label">📹 Вы</div>
+                <video id="localVideo" autoplay muted playsinline></video>
+            </div>
+            <div>
+                <div class="remote-label">👤 Друг</div>
+                <video id="remoteVideo" autoplay playsinline></video>
+            </div>
+        </div>
+    </div>
+
+    <!-- Библиотеки -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    
+    <script>
+        // Элементы
+        const createBtn = document.getElementById('createBtn');
+        const joinBtn = document.getElementById('joinBtn');
+        const roomInput = document.getElementById('roomInput');
+        const roomInfo = document.getElementById('roomInfo');
+        const roomCode = document.getElementById('roomCode');
+        const copyBtn = document.getElementById('copyBtn');
+        const localVideo = document.getElementById('localVideo');
+        const remoteVideo = document.getElementById('remoteVideo');
+        const hostStatus = document.getElementById('hostStatus');
+        const joinStatus = document.getElementById('joinStatus');
+
+        // Переменные
+        let localStream = null;
+        let peer = null;
+        let currentCall = null;
+
+        // Генерация кода комнаты
+        function generateRoomCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    result += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                if (i < 3) result += '-';
+            }
+            return result;
+        }
+
+        // Получение доступа к камере
+        async function getLocalMedia() {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: true, 
+                    audio: true 
+                });
+                localVideo.srcObject = localStream;
+                return true;
+            } catch (err) {
+                alert('Нужен доступ к камере и микрофону: ' + err.message);
+                return false;
+            }
+        }
+
+        // Настройка Peer
+        function initPeer(peerId = null) {
+            if (peer) peer.destroy();
+            
+            peer = new Peer(peerId, {
+                config: {
+                    'iceServers': [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'stun:stun2.l.google.com:19302' },
+                        { urls: 'stun:stun3.l.google.com:19302' },
+                        { urls: 'stun:stun4.l.google.com:19302' }
+                    ]
+                }
+            });
+
+            peer.on('open', (id) => {
+                console.log('Connected with ID:', id);
+                if (peerId) {
+                    roomCode.textContent = id;
+                    roomInfo.style.display = 'block';
+                }
+            });
+
+            peer.on('call', (call) => {
+                if (!localStream) return;
+                call.answer(localStream);
+                setupCallEvents(call);
+                hostStatus.textContent = '🟢 Друг подключился!';
+                hostStatus.className = 'status success';
+            });
+
+            peer.on('error', (err) => {
+                console.error('Peer error:', err);
+                if (err.type === 'unavailable-id') {
+                    alert('Этот код уже используется. Попробуйте другой.');
+                }
+            });
+
+            return peer;
+        }
+
+        // Обработка звонка
+        function setupCallEvents(call) {
+            currentCall = call;
+            
+            call.on('stream', (remoteStream) => {
+                remoteVideo.srcObject = remoteStream;
+                joinStatus.textContent = '✅ Подключено!';
+                joinStatus.className = 'status success';
+                hostStatus.textContent = '✅ Друг подключился!';
+                hostStatus.className = 'status success';
+            });
+
+            call.on('close', () => {
+                remoteVideo.srcObject = null;
+                joinStatus.textContent = '❌ Соединение разорвано';
+                joinStatus.className = 'status waiting';
+                hostStatus.textContent = '❌ Друг отключился';
+                hostStatus.className = 'status waiting';
+            });
+        }
+
+        // Создание комнаты
+        createBtn.addEventListener('click', async () => {
+            const ok = await getLocalMedia();
+            if (!ok) return;
+            
+            const roomId = generateRoomCode();
+            initPeer(roomId);
+            
+            createBtn.disabled = true;
+            joinBtn.disabled = true;
+        });
+
+        // Подключение к комнате
+        joinBtn.addEventListener('click', async () => {
+            const roomId = roomInput.value.trim();
+            if (!roomId) {
+                alert('Введите код комнаты');
+                return;
+            }
+
+            const ok = await getLocalMedia();
+            if (!ok) return;
+
+            initPeer();
+            joinStatus.textContent = '⏳ Подключаемся...';
+            joinStatus.className = 'status waiting';
+
+            peer.on('open', () => {
+                const call = peer.call(roomId, localStream);
+                if (call) {
+                    setupCallEvents(call);
+                } else {
+                    joinStatus.textContent = '❌ Комната не найдена';
+                    joinStatus.className = 'status waiting';
+                }
+            });
+
+            createBtn.disabled = true;
+            joinBtn.disabled = true;
+        });
+
+        // Копирование кода
+        copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(roomCode.textContent)
+                .then(() => {
+                    copyBtn.textContent = '✅ Скопировано!';
+                    setTimeout(() => {
+                        copyBtn.textContent = '📋 Копировать код';
+                    }, 2000);
+                });
+        });
+
+        // Разблокировка кнопок при ошибках
+        peer?.on('error', () => {
+            createBtn.disabled = false;
+            joinBtn.disabled = false;
+        });
+    </script>
+</body>
+</html>
