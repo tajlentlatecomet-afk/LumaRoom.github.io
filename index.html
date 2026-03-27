@@ -1,827 +1,600 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VoiceRoom — временные голосовые комнаты</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet" />
-  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Водянной сахар - растовряемся в земле</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;700;900&family=Onest:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent:  #7a9e8e;
+    --accent2: #5c7a6e;
+    --dark:    #0e0e0e;
+    --darker:  #080808;
+    --panel:   #131313;
+    --panel2:  #171717;
+    --border:  #222;
+    --white:   #d8d4cc;
+    --muted:   #5a5650;
+    --dim:     #2a2826;
+  }
 
-    :root {
-      --bg: #0a0a0f;
-      --surface: #12121a;
-      --surface2: #1c1c28;
-      --accent: #00ffa3;
-      --accent2: #7b5ea7;
-      --danger: #ff4d6d;
-      --text: #e8e8f0;
-      --muted: #6b6b80;
-      --border: rgba(255,255,255,0.07);
-    }
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-    html, body {
-      height: 100%;
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Syne', sans-serif;
-      overflow: hidden;
-    }
+  html, body {
+    width: 100%; height: 100%;
+    background: #060606;
+    font-family: 'Onest', sans-serif;
+    color: var(--white);
+    overflow: hidden;
+  }
 
-    /* Animated background */
-    body::before {
-      content: '';
-      position: fixed; inset: 0;
-      background: 
-        radial-gradient(ellipse 60% 40% at 20% 50%, rgba(0,255,163,0.04) 0%, transparent 70%),
-        radial-gradient(ellipse 50% 60% at 80% 30%, rgba(123,94,167,0.06) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
-    }
+  /* ═══════════════════════════════════
+     STAGE: vertical flex column
+  ═══════════════════════════════════ */
+  .stage {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
 
-    /* Grid lines */
-    body::after {
-      content: '';
-      position: fixed; inset: 0;
-      background-image:
-        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
-      background-size: 60px 60px;
-      pointer-events: none;
-      z-index: 0;
-    }
+  /* ── TICKER ── */
+  .ticker {
+    flex: 0 0 30px;
+    background: var(--dim);
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+  }
+  .ticker-inner {
+    display: flex;
+    white-space: nowrap;
+    animation: tickMove 22s linear infinite;
+  }
+  .ticker-inner span {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: .16em;
+    color: var(--muted);
+    padding: 0 20px;
+    text-transform: uppercase;
+  }
+  .ticker-inner .dot { color: var(--accent); padding: 0 6px; }
+  @keyframes tickMove {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
 
-    #app {
-      position: relative;
-      z-index: 1;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
+  .main {
+    flex: 1 1 0;
+    min-height: 0;          
+    display: grid;
+    grid-template-columns: 2.4fr 1.1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 1px;
+    background: var(--border)
+  }
 
-    /* ---- Header ---- */
-    .logo {
-      position: fixed;
-      top: 28px; left: 32px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-family: 'Space Mono', monospace;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      color: var(--accent);
-      text-transform: uppercase;
-    }
-    .logo-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 12px var(--accent);
-      animation: pulse 2s ease-in-out infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(0.8); }
-    }
+  .footer {
+    flex: 0 0 50px;
+    background: var(--darker);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+  }
 
-    .status-bar {
-      position: fixed;
-      top: 28px; right: 32px;
-      font-family: 'Space Mono', monospace;
-      font-size: 11px;
-      color: var(--muted);
-    }
-    #conn-status { color: var(--accent); }
+  .hero {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    background: var(--panel);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 44px 52px 40px;
+  }
+  .hero::before {          
+    content: '';
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    opacity: .025;
+    pointer-events: none;
+  }
 
-    /* ---- Screens ---- */
-    .screen {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      gap: 32px;
-      width: 100%;
-      max-width: 480px;
-      animation: fadeUp 0.4s ease both;
-    }
-    .screen.active { display: flex; }
+  .deco-cross {
+    position: absolute;
+    right: 48px; top: 44px;
+    opacity: .08;
+    pointer-events: none;
+  }
 
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #2e2c28;
+    padding: 5px 12px 5px 8px;
+    margin-bottom: 36px;
+    width: fit-content;
+  }
+  .badge-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2.2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1;   transform: scale(1); }
+    50%      { opacity: .35; transform: scale(.65); }
+  }
+  .badge span {
+    font-size: 9px;
+    letter-spacing: .15em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
 
-    .headline {
-      text-align: center;
-    }
-    .headline h1 {
-      font-size: clamp(2rem, 6vw, 3.2rem);
-      font-weight: 800;
-      line-height: 1.05;
-      letter-spacing: -0.03em;
-      background: linear-gradient(135deg, #fff 30%, var(--accent) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .headline p {
-      margin-top: 12px;
-      font-size: 15px;
-      color: var(--muted);
-      line-height: 1.6;
-    }
+  .hero-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: clamp(46px, 5.4vw, 82px);
+    font-weight: 900;
+    line-height: .95;
+    letter-spacing: -.025em;
+    color: var(--white);
+  }
+  .hero-title .accent { color: var(--accent); display: block; }
 
-    /* ---- Cards ---- */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 28px 32px;
-      width: 100%;
-      position: relative;
-      overflow: hidden;
-    }
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(0,255,163,0.3), transparent);
-    }
+  .hero-meta {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+  .hero-tagline {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.75;
+    font-weight: 300;
+    max-width: 260px;
+  }
+  .hero-phone-label {
+    font-size: 8px;
+    letter-spacing: .18em;
+    color: #3a3835;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .hero-phone-num {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 13px; font-weight: 700;
+    color: var(--white); letter-spacing: .08em;
+  }
 
-    /* ---- Buttons ---- */
-    .btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      width: 100%;
-      padding: 16px 24px;
-      border: none;
-      border-radius: 10px;
-      font-family: 'Syne', sans-serif;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.18s ease;
-      letter-spacing: 0.01em;
-      position: relative;
-      overflow: hidden;
-    }
-    .btn::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: rgba(255,255,255,0);
-      transition: background 0.15s;
-    }
-    .btn:hover::after { background: rgba(255,255,255,0.06); }
-    .btn:active { transform: scale(0.98); }
+  .block-year {
+    grid-column: 2;
+    grid-row: 1;
+    background: var(--accent2);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .block-year::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,.04) 0%, transparent 55%);
+    pointer-events: none;
+  }
 
-    .btn-primary {
-      background: var(--accent);
-      color: #000;
-    }
-    .btn-primary:hover { box-shadow: 0 0 24px rgba(0,255,163,0.35); }
+  .year-number {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 40px; font-weight: 900;
+    color: var(--darker); letter-spacing: -.04em;
+    line-height: 1; position: relative; z-index: 1;
+  }
+  .year-sub {
+    font-size: 8px; letter-spacing: .2em;
+    color: var(--darker); opacity: .5;
+    text-transform: uppercase; position: relative; z-index: 1;
+  }
+  .open-badge {
+    position: absolute;
+    bottom: 16px; left: 50%;
+    transform: translateX(-50%);
+    border: 1px solid rgba(0,0,0,.2);
+    padding: 4px 12px;
+    font-size: 8px; letter-spacing: .2em;
+    color: var(--darker); opacity: .45;
+    text-transform: uppercase; white-space: nowrap; z-index: 1;
+  }
 
-    .btn-secondary {
-      background: var(--surface2);
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
+  .sp {
+    position: absolute; bottom: 0;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(255,255,255,.08) 0%, transparent 70%);
+    animation: smokeUp 5s ease-out infinite;
+    pointer-events: none;
+  }
 
-    .btn-danger {
-      background: rgba(255,77,109,0.15);
-      color: var(--danger);
-      border: 1px solid rgba(255,77,109,0.3);
-    }
-    .btn-danger:hover { box-shadow: 0 0 20px rgba(255,77,109,0.2); }
+  @keyframes smokeUp {
+    0%   { opacity: 0; transform: translateY(0) scale(1); }
+    40%  { opacity: .6; }
+    100% { opacity: 0; transform: translateY(-110px) scale(2.4); }
+  }
 
-    /* ---- Input ---- */
-    .input-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      width: 100%;
-    }
-    .input-wrap label {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      font-family: 'Space Mono', monospace;
-    }
-    input[type="text"] {
-      width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 14px 16px;
-      font-family: 'Space Mono', monospace;
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      text-align: center;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    input[type="text"]::placeholder { color: var(--muted); letter-spacing: 0.08em; font-size: 14px; }
-    input[type="text"]:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(0,255,163,0.1);
-    }
+  .block-services {
+    grid-column: 3;
+    grid-row: 1;
+    display: grid;
+    grid-template-rows: 1fr 1px 1fr;
+    background: var(--border);
+  }
+  .svc-divider { background: var(--border); }
 
-    /* ---- Room code display ---- */
-    .room-code-display {
-      text-align: center;
-    }
-    .room-code-label {
-      font-family: 'Space Mono', monospace;
-      font-size: 11px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 12px;
-    }
-    .room-code-value {
-      font-family: 'Space Mono', monospace;
-      font-size: clamp(2rem, 8vw, 3.5rem);
-      font-weight: 700;
-      letter-spacing: 0.2em;
-      color: var(--accent);
-      text-shadow: 0 0 30px rgba(0,255,163,0.4);
-      cursor: pointer;
-      transition: all 0.2s;
-      user-select: all;
-    }
-    .room-code-value:hover { text-shadow: 0 0 50px rgba(0,255,163,0.6); }
-    .copy-hint {
-      margin-top: 8px;
-      font-size: 12px;
-      color: var(--muted);
-    }
+  .service-item {
+    background: var(--panel2);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px 22px;
+    cursor: pointer;
+    transition: background .2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .service-item:hover { background: #1d1d1d; }
+  .service-item::before {
+    content: '';
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 2px; background: transparent;
+    transition: background .25s;
+  }
+  .service-item:hover::before { background: var(--accent); }
 
-    /* ---- Visualizer ---- */
-    .visualizer-wrap {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-    }
-    .visualizer {
-      width: 100%;
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-    }
-    .bar {
-      width: 4px;
-      border-radius: 2px;
-      background: var(--accent);
-      opacity: 0.5;
-      transition: height 0.06s ease;
-      min-height: 4px;
-    }
+  .service-num  { font-size: 9px; color: #383530; letter-spacing: .12em; }
+  .service-icon-wrap svg {
+    width: 20px; height: 20px;
+    stroke: var(--accent); fill: none;
+    stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .service-name {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 12px; font-weight: 700;
+    color: var(--white); letter-spacing: .04em;
+  }
+  .service-desc { font-size: 9px; color: var(--muted); margin-top: 2px; }
 
-    /* ---- Connection status badge ---- */
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      padding: 6px 14px;
-      border-radius: 100px;
-      font-family: 'Space Mono', monospace;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-    .badge-waiting {
-      background: rgba(123,94,167,0.15);
-      border: 1px solid rgba(123,94,167,0.3);
-      color: #c4a9e8;
-    }
-    .badge-connected {
-      background: rgba(0,255,163,0.1);
-      border: 1px solid rgba(0,255,163,0.3);
-      color: var(--accent);
-    }
-    .badge-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: currentColor;
-    }
-    .badge-waiting .badge-dot { animation: pulse 1.5s ease-in-out infinite; }
+  .block-party {
+    grid-column: 2;
+    grid-row: 2;
+    background: var(--panel);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0 22px;
+    cursor: pointer;
+    transition: background .2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .block-party:hover { background: #161616; }
+  .block-party::before {
+    content: '';
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 2px; background: var(--accent);
+  }
+  .party-icon {
+    width: 40px; height: 40px;
+    border: 1px solid var(--dim);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .party-icon svg {
+    width: 18px; height: 18px;
+    stroke: var(--accent); fill: none;
+    stroke-width: 1.5; stroke-linecap: round;
+  }
+  .party-text { flex: 1; min-width: 0; }
+  .party-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 11px; font-weight: 700;
+    color: var(--white); letter-spacing: .06em;
+  }
+  .party-sub { font-size: 9px; color: var(--muted); margin-top: 3px; }
+  .party-arrow svg {
+    width: 16px; height: 16px;
+    stroke: var(--accent); fill: none;
+    stroke-width: 1.5; stroke-linecap: round;
+  }
 
-    /* ---- Mute button ---- */
-    .mute-btn {
-      width: 64px; height: 64px;
-      border-radius: 50%;
-      border: 2px solid var(--accent);
-      background: transparent;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-      font-size: 24px;
-    }
-    .mute-btn:hover {
-      background: rgba(0,255,163,0.1);
-      box-shadow: 0 0 20px rgba(0,255,163,0.2);
-    }
-    .mute-btn.muted {
-      border-color: var(--danger);
-      background: rgba(255,77,109,0.1);
-    }
+  .block-pricing {
+    grid-column: 3;
+    grid-row: 2;
+    background: var(--panel2);
+    display: flex;
+    flex-direction: column;
+  }
+  .pricing-header {
+    flex: 0 0 auto;
+    padding: 10px 22px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .pricing-header svg {
+    width: 12px; height: 12px;
+    stroke: #383530; fill: none; stroke-width: 1.5;
+  }
+  .pricing-header span {
+    font-size: 8px; letter-spacing: .18em;
+    color: #383530; text-transform: uppercase;
+  }
 
-    /* ---- Divider ---- */
-    .divider {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      width: 100%;
-      color: var(--muted);
-      font-size: 12px;
-      font-family: 'Space Mono', monospace;
-    }
-    .divider::before, .divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
+  .price-row {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 22px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background .2s;
+    position: relative;
+    min-height: 0;
+  }
+  .price-row:last-child { border-bottom: none; }
+  .price-row:hover      { background: #1c1c1c; }
+  .price-row.highlight  { background: rgba(92,122,110,.07); }
+  .price-row::before {
+    content: '';
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 2px; background: transparent;
+    transition: background .25s;
+  }
+  .price-row.highlight::before { background: var(--accent); }
+  .price-row:hover::before     { background: var(--accent2); }
 
-    /* ---- Error ---- */
-    .error-msg {
-      background: rgba(255,77,109,0.1);
-      border: 1px solid rgba(255,77,109,0.3);
-      border-radius: 8px;
-      padding: 12px 16px;
-      font-size: 13px;
-      color: var(--danger);
-      width: 100%;
-      text-align: center;
-      display: none;
-    }
-    .error-msg.show { display: block; }
+  .price-tier {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 11px; font-weight: 700;
+    color: var(--white); letter-spacing: .05em;
+  }
+  .price-tier.vip { color: var(--accent); }
+  .price-desc { font-size: 9px; color: var(--muted); margin-top: 2px; }
+  .price-val  {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 12px; font-weight: 700; color: var(--white);
+  }
+  .price-val.vip { color: var(--accent); }
 
-    /* ---- Timer ---- */
-    .room-timer {
-      font-family: 'Space Mono', monospace;
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .room-timer span { color: var(--text); }
+  .footer-left {
+    display: flex; align-items: center; gap: 28px;
+  }
+  .footer-brand {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 9px; font-weight: 700;
+    color: #2e2c28; letter-spacing: .14em;
+  }
+  .footer-addr { font-size: 10px; color: #3a3835; letter-spacing: .04em; }
+  .footer-addr strong { color: #4a4742; font-weight: 500; }
 
-    /* ---- Loader ---- */
-    .loader {
-      width: 20px; height: 20px;
-      border: 2px solid rgba(0,255,163,0.2);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      display: none;
-    }
-    .loader.show { display: block; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+  .cta-btn {
+    background: var(--accent);
+    border: none;
+    padding: 12px 32px;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 10px; font-weight: 900;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: var(--darker);
+    cursor: pointer;
+    display: flex; align-items: center; gap: 9px;
+    transition: background .2s, transform .1s;
+  }
+  .cta-btn:hover  { background: var(--accent2); color: var(--white); }
+  .cta-btn:active { transform: scale(.98); }
+  .cta-btn svg {
+    width: 15px; height: 15px;
+    stroke: currentColor; fill: none;
+    stroke-width: 1.8; stroke-linecap: round;
+  }
 
-    /* ---- Toast ---- */
-    .toast {
-      position: fixed;
-      bottom: 32px;
-      left: 50%;
-      transform: translateX(-50%) translateY(80px);
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px 20px;
-      font-size: 13px;
-      color: var(--text);
-      transition: transform 0.3s ease;
-      z-index: 100;
-      white-space: nowrap;
-    }
-    .toast.show { transform: translateX(-50%) translateY(0); }
-  </style>
+  .footer-right { display: flex; align-items: center; gap: 8px; }
+  .social-btn {
+    width: 30px; height: 30px;
+    border: 1px solid #222;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: border-color .2s, color .2s;
+    font-size: 9px; font-weight: 700; color: #3a3835;
+  }
+  .social-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .ticker         { animation: fadeUp .5s .00s both; }
+  .hero           { animation: fadeUp .5s .08s both; }
+  .block-year     { animation: fadeUp .5s .14s both; }
+  .block-services { animation: fadeUp .5s .20s both; }
+  .block-party    { animation: fadeUp .5s .26s both; }
+  .block-pricing  { animation: fadeUp .5s .32s both; }
+  .footer         { animation: fadeUp .5s .38s both; }
+</style>
 </head>
 <body>
-  <div class="logo">
-    <div class="logo-dot"></div>
-    VoiceRoom
-  </div>
-  <div class="status-bar">
-    <span id="conn-status">Инициализация…</span>
-  </div>
+<div class="stage">
 
-  <div id="app">
-
-    <!-- SCREEN: Home -->
-    <div class="screen active" id="screen-home">
-      <div class="headline">
-        <h1>Голосовые<br/>комнаты</h1>
-        <p>Создай комнату — поделись кодом.<br/>Никакой регистрации, никаких следов.</p>
-      </div>
-      <div class="card" style="display:flex;flex-direction:column;gap:16px;">
-        <button class="btn btn-primary" id="btn-create">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-          Создать комнату
-        </button>
-        <div class="divider">или</div>
-        <div class="input-wrap">
-          <label>Код комнаты</label>
-          <input type="text" id="join-code" maxlength="6" placeholder="ABCDEF" autocomplete="off" spellcheck="false" />
-        </div>
-        <button class="btn btn-secondary" id="btn-join">
-          Войти в комнату
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </button>
-        <div class="error-msg" id="home-error"></div>
-      </div>
+  <div class="ticker">
+    <div class="ticker-inner">
+      <span>☩</span><span class="dot">·</span>
+      <span>Агентство ритуального юмора</span><span class="dot">·</span>
+      <span>Не Грусти</span><span class="dot">·</span>
+      <span>Уходите красиво</span><span class="dot">·</span>
+      <span>☩</span><span class="dot">·</span>
+      <span>+7 (383) 383-63-33</span><span class="dot">·</span>
+      <span>м. Площадь Ленина</span><span class="dot">·</span>
+      <span>Работаем 24/7</span><span class="dot">·</span>
+      <span>☩</span><span class="dot">·</span>
+      <span>Агентство ритуального юмора</span><span class="dot">·</span>
+      <span>Не Грусти</span><span class="dot">·</span>
+      <span>Уходите красиво</span><span class="dot">·</span>
+      <span>☩</span><span class="dot">·</span>
+      <span>+7 (383) 383-63-33а</span><span class="dot">·</span>
+      <span>м. Площадь Ленина</span><span class="dot">·</span>
+      <span>Работаем 24/7</span><span class="dot">·</span>
     </div>
+  </div>
 
-    <!-- SCREEN: Waiting (host) -->
-    <div class="screen" id="screen-waiting">
-      <div class="headline">
-        <h1>Ждём<br/>гостя</h1>
-        <p>Поделитесь кодом — и собеседник подключится.</p>
-      </div>
-      <div class="card" style="display:flex;flex-direction:column;gap:20px;align-items:center;">
-        <div class="room-code-display">
-          <div class="room-code-label">Код комнаты</div>
-          <div class="room-code-value" id="display-code" title="Нажмите, чтобы скопировать">------</div>
-          <div class="copy-hint">Нажмите на код, чтобы скопировать</div>
-        </div>
-        <div class="badge badge-waiting">
+  <div class="main">
+    <div class="hero">
+      <svg class="deco-cross" width="80" height="80" viewBox="0 0 80 80" fill="none">
+        <rect x="34" y="0"  width="12" height="80" fill="white"/>
+        <rect x="0"  y="28" width="80" height="12" fill="white"/>
+      </svg>
+
+      <div>
+        <div class="badge">
           <div class="badge-dot"></div>
-          Ожидание подключения
+          <span>С нами с 2025 года · +7 (383) 383-63-33</span>
         </div>
-        <div class="loader show" id="waiting-loader"></div>
+        <h1 class="hero-title">
+          УХОДИТЕ КРАСИВО.<br>
+        </h1>
       </div>
-      <button class="btn btn-danger" id="btn-cancel-wait" style="max-width:200px;">
-        Отменить
-      </button>
+
+      <div class="hero-meta">
+        <p class="hero-tagline">
+          Смех продлевает жизнь, но,<br>к сожалению, не навсегда.
+        </p>
+        <div>
+          <div class="hero-phone-label">Позвоните нам</div>
+          <div class="hero-phone-num">+7 (383) 383-63-33</div>
+        </div>
+      </div>
     </div>
 
-    <!-- SCREEN: In call -->
-    <div class="screen" id="screen-call">
-      <div class="headline" style="text-align:center;">
-        <h1>В эфире</h1>
-      </div>
-      <div class="card" style="display:flex;flex-direction:column;gap:20px;align-items:center;">
-        <div class="badge badge-connected" id="call-badge">
-          <div class="badge-dot"></div>
-          Соединение установлено
-        </div>
+    <div class="block-year">
+      <div class="sp" style="width:56px;height:86px;left:28%;animation-delay:0s;"></div>
+      <div class="sp" style="width:72px;height:104px;left:44%;animation-delay:1.9s;"></div>
+      <div class="sp" style="width:48px;height:72px;left:62%;animation-delay:3.4s;"></div>
+      <div class="year-number">2025</div>
+      <div class="year-sub">Год основания</div>
+      <div class="open-badge">МЫ ОТКРЫТЫ 24/7</div>
+    </div>
 
-        <!-- Visualizer -->
-        <div class="visualizer-wrap">
-          <div class="visualizer" id="visualizer"></div>
-          <div class="room-timer" id="call-timer">00:00</div>
+    <div class="block-services">
+      <div class="service-item">
+        <div class="service-num">01</div>
+        <div class="service-icon-wrap">
+          <svg viewBox="0 0 24 24">
+            <line x1="3" y1="21" x2="11" y2="13"/>
+            <path d="M14.5 7.5 L16.5 5.5 A2.8 2.8 0 0 1 20.5 9.5 L18.5 11.5 Z"/>
+            <line x1="11" y1="13" x2="14.5" y2="7.5"/>
+          </svg>
         </div>
-
-        <!-- Mute -->
-        <button class="mute-btn" id="btn-mute" title="Включить/выключить микрофон">
-          🎤
-        </button>
-        <div style="font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;">
-          НАЖМИТЕ ДЛЯ MUTE
+        <div>
+          <div class="service-name">ЗАКОПАТЬ</div>
+          <div class="service-desc">Классика жанра</div>
         </div>
       </div>
-      <button class="btn btn-danger" id="btn-hangup" style="max-width:200px;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07C9.44 17.25 7.76 15.59 6.32 13.56A19.74 19.74 0 0 1 3.26 5.07 2 2 0 0 1 5.24 3h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L9.22 10.89"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-        Завершить
-      </button>
+      <div class="svc-divider"></div>
+      <div class="service-item">
+        <div class="service-num">02</div>
+        <div class="service-icon-wrap">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2 C12 2 7 7 7 12 A5 5 0 0 0 17 12 C17 10 16.2 8.2 15 7 C15 9 13.5 10 12 10 C10.5 10 9 9 9 7 C9 5 12 2 12 2 Z"/>
+            <path d="M10 17 Q10 21 12 21 Q14 21 14 17"/>
+          </svg>
+        </div>
+        <div>
+          <div class="service-name">СЖЕЧЬ</div>
+          <div class="service-desc">Горячее предложение</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="block-party">
+      <div class="party-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M9 18V5l12-2v13"/>
+          <circle cx="6" cy="18" r="3"/>
+          <circle cx="18" cy="16" r="3"/>
+        </svg>
+      </div>
+      <div class="party-text">
+        <div class="party-title">ВЕЧЕРИНКА</div>
+        <div class="party-sub">Поминки с диджеем</div>
+      </div>
+      <div class="party-arrow">
+        <svg viewBox="0 0 24 24">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="block-pricing">
+      <div class="pricing-header">
+        <svg viewBox="0 0 24 24">
+          <rect x="3" y="3" width="18" height="18" rx="1"/>
+          <path d="M3 9h18M9 21V9"/>
+        </svg>
+        <span>Прейскурант (без СМС)</span>
+      </div>
+      <div class="price-row">
+        <div>
+          <div class="price-tier">СТАНДАРТ</div>
+          <div class="price-desc">Серьёзно и со вкусом</div>
+        </div>
+        <div class="price-val">₽15К</div>
+      </div>
+      <div class="price-row highlight">
+        <div>
+          <div class="price-tier vip">VIP</div>
+          <div class="price-desc">Шампанское и фейерверк</div>
+        </div>
+        <div class="price-val vip">₽50К</div>
+      </div>
+      <div class="price-row">
+        <div>
+          <div class="price-tier">ЭКСТРИМ</div>
+          <div class="price-desc">Прыжок с парашютом (без)</div>
+        </div>
+        <div class="price-val">₽99К</div>
+      </div>
     </div>
 
   </div>
+  <div class="footer">
+    <div class="footer-left">
+      <div class="footer-brand">НЕ ГРУСТИ</div>
+      <div class="footer-addr"><strong>Адрес:</strong>м. Площадь Ленина</div>
+    </div>
 
-  <!-- Toast -->
-  <div class="toast" id="toast"></div>
+    <button class="cta-btn">
+      <svg viewBox="0 0 24 24">
+        <circle cx="12" cy="10" r="7"/>
+        <path d="M9 8.5h.01M15 8.5h.01"/>
+        <path d="M9.5 12.5 Q12 15 14.5 12.5"/>
+        <path d="M8 17v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2"/>
+        <line x1="10" y1="17" x2="10" y2="18"/>
+        <line x1="14" y1="17" x2="14" y2="18"/>
+      </svg>
+      ЗАКАЗАТЬ ФИНАЛ
+    </button>
 
-  <script>
-    // ======== State ========
-    let peer = null;
-    let currentCall = null;
-    let localStream = null;
-    let myRole = null; // 'host' | 'guest'
-    let callTimer = null;
-    let callSeconds = 0;
-    let muted = false;
-    let analyser = null;
-    let animFrame = null;
+    <div class="footer-right">
+      <div class="social-btn">TG</div>
+      <div class="social-btn">VK</div>
+    </div>
+  </div>
 
-    // ======== DOM ========
-    const $ = id => document.getElementById(id);
-    const screens = {
-      home: $('screen-home'),
-      waiting: $('screen-waiting'),
-      call: $('screen-call')
-    };
-
-    function showScreen(name) {
-      Object.values(screens).forEach(s => s.classList.remove('active'));
-      screens[name].classList.add('active');
-    }
-
-    function setConnStatus(txt, color) {
-      const el = $('conn-status');
-      el.textContent = txt;
-      el.style.color = color || 'var(--accent)';
-    }
-
-    function showToast(msg, duration = 2500) {
-      const t = $('toast');
-      t.textContent = msg;
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), duration);
-    }
-
-    function showError(id, msg) {
-      const el = $(id);
-      el.textContent = msg;
-      el.classList.add('show');
-      setTimeout(() => el.classList.remove('show'), 4000);
-    }
-
-    // ======== Generate room code ========
-    function genCode() {
-      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-      let code = '';
-      for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
-      return code;
-    }
-
-    // ======== Init PeerJS ========
-    function initPeer(customId) {
-      return new Promise((resolve, reject) => {
-        const id = customId || genCode();
-        const p = new Peer(id, {
-          debug: 0,
-          config: {
-            iceServers: [
-              { urls: 'stun:stun.l.google.com:19302' },
-              { urls: 'stun:stun1.l.google.com:19302' }
-            ]
-          }
-        });
-
-        p.on('open', openId => {
-          setConnStatus('Готов', 'var(--accent)');
-          resolve({ peer: p, id: openId });
-        });
-
-        p.on('error', err => {
-          if (err.type === 'unavailable-id') {
-            reject(new Error('Комната с таким кодом уже занята'));
-          } else if (err.type === 'peer-unavailable') {
-            reject(new Error('Комната не найдена или недоступна'));
-          } else {
-            reject(new Error('Ошибка соединения: ' + err.type));
-          }
-        });
-
-        p.on('disconnected', () => setConnStatus('Переподключение…', 'var(--muted)'));
-        p.on('close', () => setConnStatus('Отключён', 'var(--danger)'));
-      });
-    }
-
-    // ======== Get mic ========
-    async function getMic() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-        return stream;
-      } catch(e) {
-        throw new Error('Нет доступа к микрофону. Разрешите доступ в браузере.');
-      }
-    }
-
-    // ======== Visualizer ========
-    function buildVisualizer(stream) {
-      const bars = 32;
-      const viz = $('visualizer');
-      viz.innerHTML = '';
-      const barEls = [];
-      for (let i = 0; i < bars; i++) {
-        const b = document.createElement('div');
-        b.className = 'bar';
-        b.style.height = '4px';
-        viz.appendChild(b);
-        barEls.push(b);
-      }
-
-      try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const src = ctx.createMediaStreamSource(stream);
-        analyser = ctx.createAnalyser();
-        analyser.fftSize = 128;
-        src.connect(analyser);
-        const data = new Uint8Array(analyser.frequencyBinCount);
-
-        function draw() {
-          analyser.getByteFrequencyData(data);
-          barEls.forEach((b, i) => {
-            const v = data[i] || 0;
-            b.style.height = Math.max(4, v / 4) + 'px';
-            b.style.opacity = 0.3 + (v / 255) * 0.7;
-          });
-          animFrame = requestAnimationFrame(draw);
-        }
-        draw();
-      } catch(e) {
-        // fallback: random animation
-        function fakeViz() {
-          barEls.forEach(b => {
-            b.style.height = (4 + Math.random() * 30) + 'px';
-          });
-          animFrame = requestAnimationFrame(fakeViz);
-        }
-        fakeViz();
-      }
-    }
-
-    function stopVisualizer() {
-      if (animFrame) cancelAnimationFrame(animFrame);
-      $('visualizer').innerHTML = '';
-    }
-
-    // ======== Call timer ========
-    function startTimer() {
-      callSeconds = 0;
-      callTimer = setInterval(() => {
-        callSeconds++;
-        const m = String(Math.floor(callSeconds / 60)).padStart(2,'0');
-        const s = String(callSeconds % 60).padStart(2,'0');
-        $('call-timer').textContent = m + ':' + s;
-      }, 1000);
-    }
-    function stopTimer() {
-      clearInterval(callTimer);
-      $('call-timer').textContent = '00:00';
-    }
-
-    // ======== Enter call ========
-    function enterCall(call, stream) {
-      currentCall = call;
-      localStream = stream;
-      showScreen('call');
-      startTimer();
-      buildVisualizer(stream);
-
-      call.on('stream', remoteStream => {
-        const audio = new Audio();
-        audio.srcObject = remoteStream;
-        audio.play().catch(() => {});
-      });
-
-      call.on('close', () => {
-        showToast('Собеседник отключился');
-        endCall();
-      });
-      call.on('error', () => {
-        showToast('Ошибка соединения');
-        endCall();
-      });
-    }
-
-    // ======== End call ========
-    function endCall() {
-      stopTimer();
-      stopVisualizer();
-      if (currentCall) { currentCall.close(); currentCall = null; }
-      if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
-      if (peer) { peer.destroy(); peer = null; }
-      muted = false;
-      $('btn-mute').classList.remove('muted');
-      $('btn-mute').textContent = '🎤';
-      setConnStatus('Готов', 'var(--accent)');
-      showScreen('home');
-    }
-
-    // ======== CREATE ========
-    $('btn-create').addEventListener('click', async () => {
-      $('btn-create').disabled = true;
-      try {
-        setConnStatus('Создание комнаты…', 'var(--muted)');
-        const stream = await getMic();
-        const code = genCode();
-        const { peer: p } = await initPeer(code);
-        peer = p;
-        localStream = stream;
-        myRole = 'host';
-
-        $('display-code').textContent = code;
-        showScreen('waiting');
-
-        peer.on('call', incomingCall => {
-          incomingCall.answer(stream);
-          showToast('Собеседник подключился!');
-          enterCall(incomingCall, stream);
-        });
-
-      } catch(e) {
-        showError('home-error', e.message);
-        setConnStatus('Ошибка', 'var(--danger)');
-      } finally {
-        $('btn-create').disabled = false;
-      }
-    });
-
-    // ======== COPY CODE ========
-    $('display-code').addEventListener('click', () => {
-      const code = $('display-code').textContent;
-      navigator.clipboard.writeText(code).then(() => showToast('Код скопирован: ' + code));
-    });
-
-    // ======== JOIN ========
-    $('join-code').addEventListener('input', e => {
-      e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'');
-    });
-
-    $('btn-join').addEventListener('click', async () => {
-      const code = $('join-code').value.trim().toUpperCase();
-      if (code.length < 4) { showError('home-error', 'Введите код комнаты'); return; }
-
-      $('btn-join').disabled = true;
-      try {
-        setConnStatus('Подключение…', 'var(--muted)');
-        const stream = await getMic();
-
-        const guestId = genCode() + '_G';
-        const { peer: p } = await initPeer(guestId);
-        peer = p;
-        localStream = stream;
-        myRole = 'guest';
-
-        const call = peer.call(code, stream);
-        if (!call) throw new Error('Не удалось создать звонок');
-
-        let answered = false;
-        call.on('stream', () => { answered = true; });
-
-        setTimeout(() => {
-          if (!answered) {
-            showError('home-error', 'Комната не найдена. Проверьте код.');
-            call.close();
-            peer.destroy();
-            peer = null;
-            stream.getTracks().forEach(t => t.stop());
-            setConnStatus('Ошибка', 'var(--danger)');
-          }
-        }, 8000);
-
-        enterCall(call, stream);
-        showToast('Подключаемся…');
-
-      } catch(e) {
-        showError('home-error', e.message);
-        setConnStatus('Ошибка', 'var(--danger)');
-      } finally {
-        $('btn-join').disabled = false;
-      }
-    });
-
-    $('join-code').addEventListener('keydown', e => {
-      if (e.key === 'Enter') $('btn-join').click();
-    });
-
-    // ======== CANCEL WAIT ========
-    $('btn-cancel-wait').addEventListener('click', () => {
-      if (peer) { peer.destroy(); peer = null; }
-      if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
-      setConnStatus('Готов', 'var(--accent)');
-      showScreen('home');
-    });
-
-    // ======== MUTE ========
-    $('btn-mute').addEventListener('click', () => {
-      if (!localStream) return;
-      muted = !muted;
-      localStream.getAudioTracks().forEach(t => t.enabled = !muted);
-      const btn = $('btn-mute');
-      btn.classList.toggle('muted', muted);
-      btn.textContent = muted ? '🔇' : '🎤';
-      showToast(muted ? 'Микрофон выключен' : 'Микрофон включён');
-    });
-
-    // ======== HANGUP ========
-    $('btn-hangup').addEventListener('click', () => {
-      endCall();
-      showToast('Звонок завершён');
-    });
-
-    setConnStatus('Готов');
-  </script>
+</div>
 </body>
 </html>
