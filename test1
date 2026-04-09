@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Пе пе фатафа — основы ИИ</title>
+  <style>
+    :root {
+      --fon: #f6f7fb;
+      --beliy: #ffffff;
+      --tekst: #1f2937;
+      --seriy: #6b7280;
+      --granica: #e5e7eb;
+      --akcent: #6d5dfc;
+      --akcent-svetliy: #ede9fe;
+      --ten: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--fon);
+      color: var(--tekst);
+      line-height: 1.6;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .container {
+      width: min(1000px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .header {
+      padding: 24px 0;
+    }
+
+    .shapka {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--akcent);
+    }
+
+    .menu {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+      color: var(--seriy);
+      font-size: 15px;
+    }
+
+    .hero {
+      padding: 40px 0 30px;
+    }
+
+    .hero-box {
+      background: var(--beliy);
+      border: 1px solid var(--granica);
+      border-radius: 24px;
+      padding: 48px;
+      box-shadow: var(--ten);
+    }
+
+    .metka {
+      display: inline-block;
+      background: var(--akcent-svetliy);
+      color: var(--akcent);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 14px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: clamp(34px, 6vw, 58px);
+      line-height: 1.1;
+    }
+
+    .opisanie {
+      max-width: 700px;
+      color: var(--seriy);
+      font-size: 18px;
+      margin-bottom: 26px;
+    }
+
+    .knopki {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .knopka {
+      display: inline-block;
+      padding: 14px 24px;
+      border-radius: 14px;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+
+    .knopka-glavnaya {
+      background: var(--akcent);
+      color: white;
+    }
+
+    .knopka-glavnaya:hover {
+      opacity: 0.9;
+    }
+
+    .knopka-prostaya {
+      background: white;
+      border: 1px solid var(--granica);
+      color: var(--tekst);
+    }
+
+    .sekciya {
+      padding: 26px 0;
+    }
+
+    .zagolovok {
+      margin: 0 0 10px;
+      font-size: 32px;
+    }
+
+    .podzagolovok {
+      margin: 0 0 24px;
+      color: var(--seriy);
+    }
+
+    .kartochki {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-auto-rows: 1fr;
+      gap: 18px;
+    }
+
+    /* 1 длинный слева */
+    .kartochki .kartochka:nth-child(1) {
+      grid-column: 1;
+      grid-row: 1 / span 2;
+    }
+
+    /* 2 сверху справа */
+    .kartochki .kartochka:nth-child(2) {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    /* 3 снизу справа */
+    .kartochki .kartochka:nth-child(3) {
+      grid-column: 2;
+      grid-row: 2;
+    }
+
+    .kartochka {
+      background: var(--beliy);
+      border: 1px solid var(--granica);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: var(--ten);
+    }
+
+    .nomer {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--akcent-svetliy);
+      color: var(--akcent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-bottom: 14px;
+    }
+
+    .kartochka h3 {
+      margin: 0 0 10px;
+      font-size: 20px;
+    }
+
+    .kartochka p {
+      margin: 0;
+      color: var(--seriy);
+    }
+
+    .blok-niz {
+      margin-top: 20px;
+      background: var(--beliy);
+      border: 1px solid var(--granica);
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: var(--ten);
+    }
+
+    .ssylki {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    .soc {
+      display: inline-block;
+      padding: 12px 18px;
+      background: white;
+      border: 1px solid var(--granica);
+      border-radius: 12px;
+      color: var(--tekst);
+    }
+
+    .footer {
+      padding: 30px 0 40px;
+      color: var(--seriy);
+      font-size: 14px;
+    }
+
+    @media (max-width: 850px) {
+      .kartochki {
+        grid-template-columns: 1fr;
+      }
+
+      .kartochka,
+      .kartochki .kartochka:nth-child(1),
+      .kartochki .kartochka:nth-child(2),
+      .kartochki .kartochka:nth-child(3) {
+        grid-column: auto;
+      }
+
+      .hero-box,
+      .blok-niz {
+        padding: 28px;
+      }
+    }
+
+      .hero-box,
+      .blok-niz {
+        padding: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container shapka">
+      <div class="logo">Пе пе фатафа</div>
+      <nav class="menu">
+        <a href="#o-nas">О платформе</a>
+        <a href="#moduli">Модули</a>
+        <a href="#praktika">Практика</a>
+        <a href="#kontakty">Соцсети</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="hero-box">
+          <div class="metka">Простой сайт про ИИ и нейросети</div>
+          <h1>Интерактивное обучение основам искусственного интеллекта</h1>
+          <p class="opisanie">
+            Этот сайт помогает понять, что такое искусственный интеллект, как работают нейросети,
+            зачем моделям нужны данные и как они учатся находить правильные ответы.
+            Всё объясняется простым языком и без сложных терминов.
+          </p>
+          <div class="knopki">
+            <a href="#" class="knopka knopka-glavnaya">Перейти</a>
+            <a href="#moduli" class="knopka knopka-prostaya">Смотреть разделы</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sekciya">
+      <div class="container">
+        <div class="blok-niz">
+          <h2 class="zagolovok">Примеры ИИ</h2>
+          <div style="position:relative; margin-top:20px;">
+            <img id="mainImg" src="https://serverflow.ru/upload/iblock/11d/sb8gxcv5rt500941ajrc9hpr0qtlcgnx/gemini-31-pro.jpg" style="width:100%; border-radius:16px;">
+            <button id="prevBtn" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); padding:8px 12px; border:none; border-radius:8px; background:white; cursor:pointer;">←</button>
+            <button id="nextBtn" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); padding:8px 12px; border:none; border-radius:8px; background:white; cursor:pointer;">→</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sekciya" id="o-nas">
+      <div class="container">
+        <h2 class="zagolovok">О платформе</h2>
+        <p class="podzagolovok">
+          Платформа создана для тех, кто хочет спокойно и понятно познакомиться с темой ИИ.
+        </p>
+        <div class="kartochki">
+          <div class="kartochka">
+            <div class="nomer">1</div>
+            <h3>Понятное начало</h3>
+            <p>Сначала объясняется, что такое ИИ, где он используется и почему о нём так много говорят.</p>
+          </div>
+          <div class="kartochka">
+            <div class="nomer">2</div>
+            <h3>Простые объяснения</h3>
+            <p>Материал подаётся короткими блоками, чтобы даже новичку было легко читать и понимать.</p>
+          </div>
+          <div class="kartochka">
+            <div class="nomer">3</div>
+            <h3>Небольшая практика</h3>
+            <p>После теории пользователь может посмотреть примеры и лучше понять логику работы модели.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sekciya" id="moduli">
+      <div class="container">
+        <h2 class="zagolovok">Обучающие модули</h2>
+        <p class="podzagolovok">
+          Основные темы, которые помогают быстро войти в тему нейросетей.
+        </p>
+        <div class="kartochki">
+          <div class="kartochka">
+            <h3>Что такое искусственный интеллект</h3>
+            <p>Раздел рассказывает, чем ИИ отличается от обычных программ и какие задачи он может решать.</p>
+          </div>
+          <div class="kartochka">
+            <h3>Как устроена нейросеть</h3>
+            <p>Здесь можно узнать про слои, входные данные, обработку информации и получение результата.</p>
+          </div>
+          <div class="kartochka">
+            <h3>Как проходит обучение</h3>
+            <p>Показывается, как модель делает ошибки, исправляется и постепенно учится работать лучше.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sekciya" id="praktika">
+      <div class="container">
+        <h2 class="zagolovok">Практика</h2>
+        <p class="podzagolovok">
+          Важная часть сайта — показать тему не только через текст, но и через примеры.
+        </p>
+        <div class="kartochki">
+          <div class="kartochka">
+            <h3>Примеры из жизни</h3>
+            <p>Пользователь видит, как ИИ применяется в приложениях, поиске, рекомендациях и чат-ботах.</p>
+          </div>
+          <div class="kartochka">
+            <h3>Мини-сценарии</h3>
+            <p>Небольшие интерактивные элементы помогают лучше запомнить материал и увидеть принцип работы.</p>
+          </div>
+          <div class="kartochka">
+            <h3>Повторение базы</h3>
+            <p>После разделов можно быстро повторить главные мысли и закрепить основные понятия.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sekciya" id="kontakty">
+      <div class="container">
+        <div class="blok-niz">
+          <h2 class="zagolovok">Социальные сети</h2>
+          <p class="podzagolovok">Контактная информация:</p>
+          <div class="ssylki">
+            <a href="tel:+79513754738" class="soc">Телефон: 7 951 375 4738</a>
+            <a href="https://t.me/dead_lox" class="soc">@dead_lox</a>
+            <a href="https://vk.com/model_chxcck" class="soc">VK: @model_chxcck</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">© 2026 Пе пе фатафа — интерактивное обучение основам ИИ и нейросетей.</div>
+  </footer>
+  <script>
+    const imgs = [
+      "https://serverflow.ru/upload/iblock/11d/sb8gxcv5rt500941ajrc9hpr0qtlcgnx/gemini-31-pro.jpg",
+      "https://habrastorage.org/r/w1560/getpro/habr/upload_files/2b4/665/304/2b4665304afb0fd12126d20c7f101e17.jpg",
+      "https://www.internetmatters.org/wp-content/uploads/2025/06/Chat-GPT-logo.webp"
+    ];
+
+    let index = 0;
+    const img = document.getElementById("mainImg");
+    const nextBtn = document.getElementById("nextBtn");
+    const prevBtn = document.getElementById("prevBtn");
+
+    nextBtn.addEventListener("click", () => {
+      index = (index + 1) % imgs.length;
+      img.src = imgs[index];
+    });
+
+    prevBtn.addEventListener("click", () => {
+      index = (index - 1 + imgs.length) % imgs.length;
+      img.src = imgs[index];
+    });
+  </script>
+</body>
+</html>
