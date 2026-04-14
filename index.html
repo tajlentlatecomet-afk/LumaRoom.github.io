@@ -29,18 +29,14 @@
     overflow: hidden;
   }
 
-  /* ═══════════════════════════════════
-     STAGE: vertical flex column
-  ═══════════════════════════════════ */
-  .stage {
+  .scena {
     width: 100vw;
     height: 100vh;
     display: flex;
     flex-direction: column;
   }
 
-  /* ── TICKER ── */
-  .ticker {
+  .bezhushchaya-stroka {
     flex: 0 0 30px;
     background: var(--dim);
     border-bottom: 1px solid var(--border);
@@ -48,12 +44,12 @@
     display: flex;
     align-items: center;
   }
-  .ticker-inner {
+  .bezhushchaya-stroka-vnutr {
     display: flex;
     white-space: nowrap;
-    animation: tickMove 22s linear infinite;
+    animation: dvizhenieStroki 22s linear infinite;
   }
-  .ticker-inner span {
+  .bezhushchaya-stroka-vnutr span {
     font-size: 9px;
     font-weight: 600;
     letter-spacing: .16em;
@@ -61,13 +57,13 @@
     padding: 0 20px;
     text-transform: uppercase;
   }
-  .ticker-inner .dot { color: var(--accent); padding: 0 6px; }
-  @keyframes tickMove {
+  .bezhushchaya-stroka-vnutr .tochka { color: var(--accent); padding: 0 6px; }
+  @keyframes dvizhenieStroki {
     from { transform: translateX(0); }
     to   { transform: translateX(-50%); }
   }
 
-  .main {
+  .glavnaya-setka {
     flex: 1 1 0;
     min-height: 0;          
     display: grid;
@@ -77,7 +73,7 @@
     background: var(--border)
   }
 
-  .footer {
+  .noga {
     flex: 0 0 50px;
     background: var(--darker);
     border-top: 1px solid var(--border);
@@ -87,7 +83,7 @@
     padding: 0 40px;
   }
 
-  .hero {
+  .geroj {
     grid-column: 1;
     grid-row: 1 / 3;
     background: var(--panel);
@@ -98,7 +94,7 @@
     justify-content: space-between;
     padding: 44px 52px 40px;
   }
-  .hero::before {          
+  .geroj::before {          
     content: '';
     position: absolute; inset: 0;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
@@ -106,14 +102,14 @@
     pointer-events: none;
   }
 
-  .deco-cross {
+  .dekor-krest {
     position: absolute;
     right: 48px; top: 44px;
     opacity: .08;
     pointer-events: none;
   }
 
-  .badge {
+  .znachok {
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -122,24 +118,24 @@
     margin-bottom: 36px;
     width: fit-content;
   }
-  .badge-dot {
+  .znachok-tochka {
     width: 6px; height: 6px;
     border-radius: 50%;
     background: var(--accent);
-    animation: pulse 2.2s ease-in-out infinite;
+    animation: pulsirovanie 2.2s ease-in-out infinite;
   }
-  @keyframes pulse {
+  @keyframes pulsirovanie {
     0%,100% { opacity: 1;   transform: scale(1); }
     50%      { opacity: .35; transform: scale(.65); }
   }
-  .badge span {
+  .znachok span {
     font-size: 9px;
     letter-spacing: .15em;
     color: var(--muted);
     text-transform: uppercase;
   }
 
-  .hero-title {
+  .geroj-zagolovok {
     font-family: 'Unbounded', sans-serif;
     font-size: clamp(46px, 5.4vw, 82px);
     font-weight: 900;
@@ -147,34 +143,34 @@
     letter-spacing: -.025em;
     color: var(--white);
   }
-  .hero-title .accent { color: var(--accent); display: block; }
+  .geroj-zagolovok .akcent { color: var(--accent); display: block; }
 
-  .hero-meta {
+  .geroj-niz {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
   }
-  .hero-tagline {
+  .geroj-podzagolovok {
     font-size: 12px;
     color: var(--muted);
     line-height: 1.75;
     font-weight: 300;
     max-width: 260px;
   }
-  .hero-phone-label {
+  .geroj-metka-telefona {
     font-size: 8px;
     letter-spacing: .18em;
     color: #3a3835;
     text-transform: uppercase;
     margin-bottom: 4px;
   }
-  .hero-phone-num {
+  .geroj-nomer-telefona {
     font-family: 'Unbounded', sans-serif;
     font-size: 13px; font-weight: 700;
     color: var(--white); letter-spacing: .08em;
   }
 
-  .block-year {
+  .blok-god {
     grid-column: 2;
     grid-row: 1;
     background: var(--accent2);
@@ -186,25 +182,25 @@
     justify-content: center;
     gap: 10px;
   }
-  .block-year::after {
+  .blok-god::after {
     content: '';
     position: absolute; inset: 0;
     background: linear-gradient(135deg, rgba(255,255,255,.04) 0%, transparent 55%);
     pointer-events: none;
   }
 
-  .year-number {
+  .god-cifra {
     font-family: 'Unbounded', sans-serif;
     font-size: 40px; font-weight: 900;
     color: var(--darker); letter-spacing: -.04em;
     line-height: 1; position: relative; z-index: 1;
   }
-  .year-sub {
+  .god-podpis {
     font-size: 8px; letter-spacing: .2em;
     color: var(--darker); opacity: .5;
     text-transform: uppercase; position: relative; z-index: 1;
   }
-  .open-badge {
+  .otkryto-badzh {
     position: absolute;
     bottom: 16px; left: 50%;
     transform: translateX(-50%);
@@ -215,30 +211,30 @@
     text-transform: uppercase; white-space: nowrap; z-index: 1;
   }
 
-  .sp {
+  .dymok {
     position: absolute; bottom: 0;
     border-radius: 50%;
     background: radial-gradient(ellipse, rgba(255,255,255,.08) 0%, transparent 70%);
-    animation: smokeUp 5s ease-out infinite;
+    animation: podnyatieDyma 5s ease-out infinite;
     pointer-events: none;
   }
 
-  @keyframes smokeUp {
+  @keyframes podnyatieDyma {
     0%   { opacity: 0; transform: translateY(0) scale(1); }
     40%  { opacity: .6; }
     100% { opacity: 0; transform: translateY(-110px) scale(2.4); }
   }
 
-  .block-services {
+  .blok-uslugi {
     grid-column: 3;
     grid-row: 1;
     display: grid;
     grid-template-rows: 1fr 1px 1fr;
     background: var(--border);
   }
-  .svc-divider { background: var(--border); }
+  .razdelitel-uslug { background: var(--border); }
 
-  .service-item {
+  .punkt-uslugi {
     background: var(--panel2);
     display: flex;
     flex-direction: column;
@@ -249,29 +245,29 @@
     position: relative;
     overflow: hidden;
   }
-  .service-item:hover { background: #1d1d1d; }
-  .service-item::before {
+  .punkt-uslugi:hover { background: #1d1d1d; }
+  .punkt-uslugi::before {
     content: '';
     position: absolute; left: 0; top: 0; bottom: 0;
     width: 2px; background: transparent;
     transition: background .25s;
   }
-  .service-item:hover::before { background: var(--accent); }
+  .punkt-uslugi:hover::before { background: var(--accent); }
 
-  .service-num  { font-size: 9px; color: #383530; letter-spacing: .12em; }
-  .service-icon-wrap svg {
+  .nomer-uslugi  { font-size: 9px; color: #383530; letter-spacing: .12em; }
+  .ikonka-uslugi svg {
     width: 20px; height: 20px;
     stroke: var(--accent); fill: none;
     stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
   }
-  .service-name {
+  .nazvanie-uslugi {
     font-family: 'Unbounded', sans-serif;
     font-size: 12px; font-weight: 700;
     color: var(--white); letter-spacing: .04em;
   }
-  .service-desc { font-size: 9px; color: var(--muted); margin-top: 2px; }
+  .opisanie-uslugi { font-size: 9px; color: var(--muted); margin-top: 2px; }
 
-  .block-party {
+  .blok-vecherinka {
     grid-column: 2;
     grid-row: 2;
     background: var(--panel);
@@ -284,59 +280,59 @@
     position: relative;
     overflow: hidden;
   }
-  .block-party:hover { background: #161616; }
-  .block-party::before {
+  .blok-vecherinka:hover { background: #161616; }
+  .blok-vecherinka::before {
     content: '';
     position: absolute; left: 0; top: 0; bottom: 0;
     width: 2px; background: var(--accent);
   }
-  .party-icon {
+  .vecherinka-ikonka {
     width: 40px; height: 40px;
     border: 1px solid var(--dim);
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
   }
-  .party-icon svg {
+  .vecherinka-ikonka svg {
     width: 18px; height: 18px;
     stroke: var(--accent); fill: none;
     stroke-width: 1.5; stroke-linecap: round;
   }
-  .party-text { flex: 1; min-width: 0; }
-  .party-title {
+  .vecherinka-tekst { flex: 1; min-width: 0; }
+  .vecherinka-zagolovok {
     font-family: 'Unbounded', sans-serif;
     font-size: 11px; font-weight: 700;
     color: var(--white); letter-spacing: .06em;
   }
-  .party-sub { font-size: 9px; color: var(--muted); margin-top: 3px; }
-  .party-arrow svg {
+  .vecherinka-podzagolovok { font-size: 9px; color: var(--muted); margin-top: 3px; }
+  .vecherinka-strelka svg {
     width: 16px; height: 16px;
     stroke: var(--accent); fill: none;
     stroke-width: 1.5; stroke-linecap: round;
   }
 
-  .block-pricing {
+  .blok-ceny {
     grid-column: 3;
     grid-row: 2;
     background: var(--panel2);
     display: flex;
     flex-direction: column;
   }
-  .pricing-header {
+  .ceny-shapka {
     flex: 0 0 auto;
     padding: 10px 22px;
     border-bottom: 1px solid var(--border);
     display: flex; align-items: center; gap: 8px;
   }
-  .pricing-header svg {
+  .ceny-shapka svg {
     width: 12px; height: 12px;
     stroke: #383530; fill: none; stroke-width: 1.5;
   }
-  .pricing-header span {
+  .ceny-shapka span {
     font-size: 8px; letter-spacing: .18em;
     color: #383530; text-transform: uppercase;
   }
 
-  .price-row {
+  .stroka-ceny {
     flex: 1;
     display: flex;
     align-items: center;
@@ -348,43 +344,43 @@
     position: relative;
     min-height: 0;
   }
-  .price-row:last-child { border-bottom: none; }
-  .price-row:hover      { background: #1c1c1c; }
-  .price-row.highlight  { background: rgba(92,122,110,.07); }
-  .price-row::before {
+  .stroka-ceny:last-child { border-bottom: none; }
+  .stroka-ceny:hover      { background: #1c1c1c; }
+  .stroka-ceny.vydelenie  { background: rgba(92,122,110,.07); }
+  .stroka-ceny::before {
     content: '';
     position: absolute; left: 0; top: 0; bottom: 0;
     width: 2px; background: transparent;
     transition: background .25s;
   }
-  .price-row.highlight::before { background: var(--accent); }
-  .price-row:hover::before     { background: var(--accent2); }
+  .stroka-ceny.vydelenie::before { background: var(--accent); }
+  .stroka-ceny:hover::before     { background: var(--accent2); }
 
-  .price-tier {
+  .uroven-ceny {
     font-family: 'Unbounded', sans-serif;
     font-size: 11px; font-weight: 700;
     color: var(--white); letter-spacing: .05em;
   }
-  .price-tier.vip { color: var(--accent); }
-  .price-desc { font-size: 9px; color: var(--muted); margin-top: 2px; }
-  .price-val  {
+  .uroven-ceny.vip { color: var(--accent); }
+  .opisanie-ceny { font-size: 9px; color: var(--muted); margin-top: 2px; }
+  .znachenie-ceny  {
     font-family: 'Unbounded', sans-serif;
     font-size: 12px; font-weight: 700; color: var(--white);
   }
-  .price-val.vip { color: var(--accent); }
+  .znachenie-ceny.vip { color: var(--accent); }
 
-  .footer-left {
+  .noga-levo {
     display: flex; align-items: center; gap: 28px;
   }
-  .footer-brand {
+  .noga-brend {
     font-family: 'Unbounded', sans-serif;
     font-size: 9px; font-weight: 700;
     color: #2e2c28; letter-spacing: .14em;
   }
-  .footer-addr { font-size: 10px; color: #3a3835; letter-spacing: .04em; }
-  .footer-addr strong { color: #4a4742; font-weight: 500; }
+  .noga-adres { font-size: 10px; color: #3a3835; letter-spacing: .04em; }
+  .noga-adres strong { color: #4a4742; font-weight: 500; }
 
-  .cta-btn {
+  .knopka-dejstviya {
     background: var(--accent);
     border: none;
     padding: 12px 32px;
@@ -396,16 +392,16 @@
     display: flex; align-items: center; gap: 9px;
     transition: background .2s, transform .1s;
   }
-  .cta-btn:hover  { background: var(--accent2); color: var(--white); }
-  .cta-btn:active { transform: scale(.98); }
-  .cta-btn svg {
+  .knopka-dejstviya:hover  { background: var(--accent2); color: var(--white); }
+  .knopka-dejstviya:active { transform: scale(.98); }
+  .knopka-dejstviya svg {
     width: 15px; height: 15px;
     stroke: currentColor; fill: none;
     stroke-width: 1.8; stroke-linecap: round;
   }
 
-  .footer-right { display: flex; align-items: center; gap: 8px; }
-  .social-btn {
+  .noga-pravo { display: flex; align-items: center; gap: 8px; }
+  .knopka-socseti {
     width: 30px; height: 30px;
     border: 1px solid #222;
     display: flex; align-items: center; justify-content: center;
@@ -413,86 +409,156 @@
     transition: border-color .2s, color .2s;
     font-size: 9px; font-weight: 700; color: #3a3835;
   }
-  .social-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .knopka-socseti:hover { border-color: var(--accent); color: var(--accent); }
 
-  @keyframes fadeUp {
+  .modal-login {
+    position: fixed;
+    bottom: 80px;
+    right: 40px;
+    background: var(--panel2);
+    border: 1px solid var(--accent);
+    padding: 20px;
+    width: 260px;
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    transition: all 0.2s ease;
+  }
+  .modal-login input {
+    width: 100%;
+    background: var(--dark);
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    margin-bottom: 12px;
+    color: var(--white);
+    font-size: 12px;
+    font-family: 'Onest', sans-serif;
+  }
+  .modal-login button {
+    background: var(--accent);
+    border: none;
+    width: 100%;
+    padding: 8px;
+    font-weight: bold;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    color: var(--darker);
+  }
+  .modal-login button:hover {
+    background: var(--accent2);
+    color: var(--white);
+  }
+  .modal-login .zagolovok-vxoda {
+    font-size: 11px;
+    font-family: 'Unbounded', sans-serif;
+    margin-bottom: 14px;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+    text-align: center;
+  }
+  .spisok-polzovatelej {
+    margin-top: 16px;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+    font-size: 10px;
+    color: var(--muted);
+    max-height: 140px;
+    overflow-y: auto;
+  }
+  .zapis-polzovatelya {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    padding: 4px 0;
+    border-bottom: 1px dashed var(--dim);
+    font-size: 9px;
+    color: var(--white);
+  }
+  .skryt {
+    display: none;
+  }
+
+  @keyframes poyavlenieVverh {
     from { opacity: 0; transform: translateY(12px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  .ticker         { animation: fadeUp .5s .00s both; }
-  .hero           { animation: fadeUp .5s .08s both; }
-  .block-year     { animation: fadeUp .5s .14s both; }
-  .block-services { animation: fadeUp .5s .20s both; }
-  .block-party    { animation: fadeUp .5s .26s both; }
-  .block-pricing  { animation: fadeUp .5s .32s both; }
-  .footer         { animation: fadeUp .5s .38s both; }
+  .bezhushchaya-stroka         { animation: poyavlenieVverh .5s .00s both; }
+  .geroj                       { animation: poyavlenieVverh .5s .08s both; }
+  .blok-god                    { animation: poyavlenieVverh .5s .14s both; }
+  .blok-uslugi                 { animation: poyavlenieVverh .5s .20s both; }
+  .blok-vecherinka             { animation: poyavlenieVverh .5s .26s both; }
+  .blok-ceny                   { animation: poyavlenieVverh .5s .32s both; }
+  .noga                        { animation: poyavlenieVverh .5s .38s both; }
 </style>
 </head>
 <body>
-<div class="stage">
+<div class="scena">
 
-  <div class="ticker">
-    <div class="ticker-inner">
-      <span>☩</span><span class="dot">·</span>
-      <span>Агентство ритуального юмора</span><span class="dot">·</span>
-      <span>Не Грусти</span><span class="dot">·</span>
-      <span>Уходите красиво</span><span class="dot">·</span>
-      <span>☩</span><span class="dot">·</span>
-      <span>+7 (383) 383-63-33</span><span class="dot">·</span>
-      <span>м. Площадь Ленина</span><span class="dot">·</span>
-      <span>Работаем 24/7</span><span class="dot">·</span>
-      <span>☩</span><span class="dot">·</span>
-      <span>Агентство ритуального юмора</span><span class="dot">·</span>
-      <span>Не Грусти</span><span class="dot">·</span>
-      <span>Уходите красиво</span><span class="dot">·</span>
-      <span>☩</span><span class="dot">·</span>
-      <span>+7 (383) 383-63-33а</span><span class="dot">·</span>
-      <span>м. Площадь Ленина</span><span class="dot">·</span>
-      <span>Работаем 24/7</span><span class="dot">·</span>
+  <div class="bezhushchaya-stroka">
+    <div class="bezhushchaya-stroka-vnutr">
+      <span>☩</span><span class="tochka">·</span>
+      <span>Агентство ритуального юмора</span><span class="tochka">·</span>
+      <span>Не Грусти</span><span class="tochka">·</span>
+      <span>Уходите красиво</span><span class="tochka">·</span>
+      <span>☩</span><span class="tochka">·</span>
+      <span>+7 (383) 383-63-33</span><span class="tochka">·</span>
+      <span>м. Площадь Ленина</span><span class="tochka">·</span>
+      <span>Работаем 24/7</span><span class="tochka">·</span>
+      <span>☩</span><span class="tochka">·</span>
+      <span>Агентство ритуального юмора</span><span class="tochka">·</span>
+      <span>Не Грусти</span><span class="tochka">·</span>
+      <span>Уходите красиво</span><span class="tochka">·</span>
+      <span>☩</span><span class="tochka">·</span>
+      <span>+7 (383) 383-63-33</span><span class="tochka">·</span>
+      <span>м. Площадь Ленина</span><span class="tochka">·</span>
+      <span>Работаем 24/7</span><span class="tochka">·</span>
     </div>
   </div>
 
-  <div class="main">
-    <div class="hero">
-      <svg class="deco-cross" width="80" height="80" viewBox="0 0 80 80" fill="none">
+  <div class="glavnaya-setka">
+    <div class="geroj">
+      <svg class="dekor-krest" width="80" height="80" viewBox="0 0 80 80" fill="none">
         <rect x="34" y="0"  width="12" height="80" fill="white"/>
         <rect x="0"  y="28" width="80" height="12" fill="white"/>
       </svg>
 
       <div>
-        <div class="badge">
-          <div class="badge-dot"></div>
+        <div class="znachok">
+          <div class="znachok-tochka"></div>
           <span>С нами с 2025 года · +7 (383) 383-63-33</span>
         </div>
-        <h1 class="hero-title">
+        <h1 class="geroj-zagolovok">
           УХОДИТЕ КРАСИВО.<br>
         </h1>
       </div>
 
-      <div class="hero-meta">
-        <p class="hero-tagline">
+      <div class="geroj-niz">
+        <p class="geroj-podzagolovok">
           Смех продлевает жизнь, но,<br>к сожалению, не навсегда.
         </p>
         <div>
-          <div class="hero-phone-label">Позвоните нам</div>
-          <div class="hero-phone-num">+7 (383) 383-63-33</div>
+          <div class="geroj-metka-telefona">Позвоните нам</div>
+          <div class="geroj-nomer-telefona">+7 (383) 383-63-33</div>
         </div>
       </div>
     </div>
 
-    <div class="block-year">
-      <div class="sp" style="width:56px;height:86px;left:28%;animation-delay:0s;"></div>
-      <div class="sp" style="width:72px;height:104px;left:44%;animation-delay:1.9s;"></div>
-      <div class="sp" style="width:48px;height:72px;left:62%;animation-delay:3.4s;"></div>
-      <div class="year-number">2025</div>
-      <div class="year-sub">Год основания</div>
-      <div class="open-badge">МЫ ОТКРЫТЫ 24/7</div>
+    <div class="blok-god">
+      <div class="dymok" style="width:56px;height:86px;left:28%;animation-delay:0s;"></div>
+      <div class="dymok" style="width:72px;height:104px;left:44%;animation-delay:1.9s;"></div>
+      <div class="dymok" style="width:48px;height:72px;left:62%;animation-delay:3.4s;"></div>
+      <div class="god-cifra">2025</div>
+      <div class="god-podpis">Год основания</div>
+      <div class="otkryto-badzh">МЫ ОТКРЫТЫ 24/7</div>
     </div>
 
-    <div class="block-services">
-      <div class="service-item">
-        <div class="service-num">01</div>
-        <div class="service-icon-wrap">
+    <div class="blok-uslugi">
+      <div class="punkt-uslugi">
+        <div class="nomer-uslugi">01</div>
+        <div class="ikonka-uslugi">
           <svg viewBox="0 0 24 24">
             <line x1="3" y1="21" x2="11" y2="13"/>
             <path d="M14.5 7.5 L16.5 5.5 A2.8 2.8 0 0 1 20.5 9.5 L18.5 11.5 Z"/>
@@ -500,84 +566,84 @@
           </svg>
         </div>
         <div>
-          <div class="service-name">ЗАКОПАТЬ</div>
-          <div class="service-desc">Классика жанра</div>
+          <div class="nazvanie-uslugi">ЗАКОПАТЬ</div>
+          <div class="opisanie-uslugi">Классика жанра</div>
         </div>
       </div>
-      <div class="svc-divider"></div>
-      <div class="service-item">
-        <div class="service-num">02</div>
-        <div class="service-icon-wrap">
+      <div class="razdelitel-uslug"></div>
+      <div class="punkt-uslugi">
+        <div class="nomer-uslugi">02</div>
+        <div class="ikonka-uslugi">
           <svg viewBox="0 0 24 24">
             <path d="M12 2 C12 2 7 7 7 12 A5 5 0 0 0 17 12 C17 10 16.2 8.2 15 7 C15 9 13.5 10 12 10 C10.5 10 9 9 9 7 C9 5 12 2 12 2 Z"/>
             <path d="M10 17 Q10 21 12 21 Q14 21 14 17"/>
           </svg>
         </div>
         <div>
-          <div class="service-name">СЖЕЧЬ</div>
-          <div class="service-desc">Горячее предложение</div>
+          <div class="nazvanie-uslugi">СЖЕЧЬ</div>
+          <div class="opisanie-uslugi">Горячее предложение</div>
         </div>
       </div>
     </div>
 
-    <div class="block-party">
-      <div class="party-icon">
+    <div class="blok-vecherinka">
+      <div class="vecherinka-ikonka">
         <svg viewBox="0 0 24 24">
           <path d="M9 18V5l12-2v13"/>
           <circle cx="6" cy="18" r="3"/>
           <circle cx="18" cy="16" r="3"/>
         </svg>
       </div>
-      <div class="party-text">
-        <div class="party-title">ВЕЧЕРИНКА</div>
-        <div class="party-sub">Поминки с диджеем</div>
+      <div class="vecherinka-tekst">
+        <div class="vecherinka-zagolovok">ВЕЧЕРИНКА</div>
+        <div class="vecherinka-podzagolovok">Поминки с диджеем</div>
       </div>
-      <div class="party-arrow">
+      <div class="vecherinka-strelka">
         <svg viewBox="0 0 24 24">
           <path d="M5 12h14M12 5l7 7-7 7"/>
         </svg>
       </div>
     </div>
 
-    <div class="block-pricing">
-      <div class="pricing-header">
+    <div class="blok-ceny">
+      <div class="ceny-shapka">
         <svg viewBox="0 0 24 24">
           <rect x="3" y="3" width="18" height="18" rx="1"/>
           <path d="M3 9h18M9 21V9"/>
         </svg>
         <span>Прейскурант (без СМС)</span>
       </div>
-      <div class="price-row">
+      <div class="stroka-ceny">
         <div>
-          <div class="price-tier">СТАНДАРТ</div>
-          <div class="price-desc">Серьёзно и со вкусом</div>
+          <div class="uroven-ceny">СТАНДАРТ</div>
+          <div class="opisanie-ceny">Серьёзно и со вкусом</div>
         </div>
-        <div class="price-val">₽15К</div>
+        <div class="znachenie-ceny">₽15К</div>
       </div>
-      <div class="price-row highlight">
+      <div class="stroka-ceny vydelenie">
         <div>
-          <div class="price-tier vip">VIP</div>
-          <div class="price-desc">Шампанское и фейерверк</div>
+          <div class="uroven-ceny vip">VIP</div>
+          <div class="opisanie-ceny">Шампанское и фейерверк</div>
         </div>
-        <div class="price-val vip">₽50К</div>
+        <div class="znachenie-ceny vip">₽50К</div>
       </div>
-      <div class="price-row">
+      <div class="stroka-ceny">
         <div>
-          <div class="price-tier">ЭКСТРИМ</div>
-          <div class="price-desc">Прыжок с парашютом (без)</div>
+          <div class="uroven-ceny">ЭКСТРИМ</div>
+          <div class="opisanie-ceny">Прыжок с парашютом (без)</div>
         </div>
-        <div class="price-val">₽99К</div>
+        <div class="znachenie-ceny">₽99К</div>
       </div>
     </div>
 
   </div>
-  <div class="footer">
-    <div class="footer-left">
-      <div class="footer-brand">НЕ ГРУСТИ</div>
-      <div class="footer-addr"><strong>Адрес:</strong>м. Площадь Ленина</div>
+  <div class="noga">
+    <div class="noga-levo">
+      <div class="noga-brend">НЕ ГРУСТИ</div>
+      <div class="noga-adres"><strong>Адрес:</strong> м. Площадь Ленина</div>
     </div>
 
-    <button class="cta-btn">
+    <button class="knopka-dejstviya" id="otkrytLoginBtn">
       <svg viewBox="0 0 24 24">
         <circle cx="12" cy="10" r="7"/>
         <path d="M9 8.5h.01M15 8.5h.01"/>
@@ -589,12 +655,103 @@
       ЗАКАЗАТЬ ФИНАЛ
     </button>
 
-    <div class="footer-right">
-      <div class="social-btn">TG</div>
-      <div class="social-btn">VK</div>
+    <div class="noga-pravo">
+      <div class="knopka-socseti">TG</div>
+      <div class="knopka-socseti">VK</div>
     </div>
   </div>
 
 </div>
+
+<div id="modalVxoda" class="modal-login skryt">
+  <div class="zagolovok-vxoda">ФЕЙК-ЛОГИН</div>
+  <input type="text" id="fakeName" placeholder="Ваше имя" autocomplete="off">
+  <input type="text" id="fakePhone" placeholder="Номер телефона" autocomplete="off">
+  <button id="sohranitPolzovatelya">Войти / Добавить</button>
+  <div id="spisokZapisey" class="spisok-polzovatelej">
+    <div style="font-size:8px; text-align:center; color:#3a3835;">Здесь появятся ваши данные</div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const modal = document.getElementById('modalVxoda');
+    const openBtn = document.getElementById('otkrytLoginBtn');
+    const saveBtn = document.getElementById('sohranitPolzovatelya');
+    const nameInput = document.getElementById('fakeName');
+    const phoneInput = document.getElementById('fakePhone');
+    const container = document.getElementById('spisokZapisey');
+
+    let users = [];
+
+    function renderUsers() {
+      if (!container) return;
+      if (users.length === 0) {
+        container.innerHTML = '<div style="font-size:8px; text-align:center; color:#3a3835;">Нет записей. Введите имя и номер</div>';
+        return;
+      }
+      container.innerHTML = '';
+      users.forEach((user, idx) => {
+        const row = document.createElement('div');
+        row.className = 'zapis-polzovatelya';
+        row.innerHTML = `<span><strong>${escapeHtml(user.name)}</strong>  ${escapeHtml(user.phone)}</span><span style="opacity:0.5;">✔️</span>`;
+        container.appendChild(row);
+      });
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+      });
+    }
+
+    function addUser(name, phone) {
+      if (!name.trim() || !phone.trim()) {
+        alert('Напишите имя и номер');
+        return false;
+      }
+      users.push({ name: name.trim(), phone: phone.trim() });
+      renderUsers();
+      nameInput.value = '';
+      phoneInput.value = '';
+      return true;
+    }
+
+    if (openBtn) {
+      openBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (modal.classList.contains('skryt')) {
+          modal.classList.remove('skryt');
+        } else {
+          modal.classList.add('skryt');
+        }
+      });
+    }
+
+    if (saveBtn) {
+      saveBtn.addEventListener('click', () => {
+        const nameVal = nameInput.value;
+        const phoneVal = phoneInput.value;
+        addUser(nameVal, phoneVal);
+      });
+    }
+
+    document.addEventListener('click', function(event) {
+      if (modal && !modal.classList.contains('skryt')) {
+        const isClickInside = modal.contains(event.target) || (openBtn && openBtn.contains(event.target));
+        if (!isClickInside) {
+          modal.classList.add('skryt');
+        }
+      }
+    });
+
+    renderUsers();
+  })();
+</script>
 </body>
 </html>
+```
